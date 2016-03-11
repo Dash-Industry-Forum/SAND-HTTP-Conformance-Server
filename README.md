@@ -6,7 +6,7 @@ asssited DASH (SAND).
 It validates the incoming SAND messages as well as the protocols used by
 a SAND client.
 
-# Requirements
+## Requirements
 
 - [pip](https://pip.pypa.io/en/stable/)
 
