@@ -141,16 +141,21 @@ class HeaderSyntaxChecker:
             result = None
         return result
     
-    def check_object(self, syntax, input, first_level=False):
+    def check_object(self, syntax, input, first_level=False, item_number=None):
         """Performs the syntax check when a sand-object is expected.
         syntax: description of the syntax expected for this object.
         input: string to parse (starts with the object, but may contain more at the end)
         first_level: is True if the object is a top-level one in the message.
+        item_number: if provided, it is the position of the object in the enclosing sand-list
         Returns the corresponding SandObject or raises ParsingStopped.
         The returned SandObject has its attribute char_count indicating how many
         characters where used from input."""
         result = SandObject()
         result.char_count = 0
+        if item_number is not None:
+            number_text = ' for object at position %d' % item_number
+        else:
+            number_text = ''
         # Eat input until end or some closing delimiter
         while input:
             item_length = 0 # number of chars for one item (sublist or attribute)
@@ -158,19 +163,19 @@ class HeaderSyntaxChecker:
                 # Apparently the start of a sublist
                 # First is it allowed?
                 if result.list is not None:
-                    self.add_error('Only one list is allowed')
+                    self.add_error('Only one list is allowed%s.' % number_text)
                     # we will parse it anyway, it may have the right syntax
                 elif 'list' not in syntax:
-                    self.add_error("Unexpected sand-list found. Stopping parsing.")
+                    self.add_error("Unexpected sand-list found %s. Stopping parsing." % number_text)
                     raise ParsingStopped
                 # Second, parse the sublist
                 result.list = self.check_list(syntax['list'], input)
                 item_length += result.list.char_count
                 if not result.list.closed:
                     if 'list' in syntax:
-                        self.add_error("Unmatched '[' to close sand-list")
+                        self.add_error("Unmatched '[' to close sand-list%s." % number_text)
                     else:
-                        self.add_error("Unexpected '[' found (and no closing ']')")
+                        self.add_error("Unexpected '[' found (and no closing ']')%s." % number_text)
             else:
                 # We have to parse a sand-attribute
                 # First decompose name=something
@@ -180,25 +185,25 @@ class HeaderSyntaxChecker:
                 except ValueError:
                     attr_name = input
                     right = None
-                    self.add_error("Expecting '=' for sand-attribute")
+                    self.add_error("Expecting '=' for sand-attribute%s." % number_text)
                 # Check attribute name is well formed
                 if not attr_name.isalpha():
                     # TODO: make a special case for white space
-                    self.add_error("sand-attribute name should be alphabetic.")
+                    self.add_error("sand-attribute name should be alphabetic%s." % number_text)
                 item_length += len(attr_name)
                 # Check we have something to parse for the value
                 if right is not None and not right:
-                    self.add_error("Empty value for sand-attribute after '='")
+                    self.add_error("Empty value for sand-attribute after '='%s." % number_text)
                 # Check it is an expected attribute
                 if attr_name not in syntax:
-                    self.add_error("Unexpected sand-attribute name '%s'. Stopping parsing." % attr_name)
+                    self.add_error("Unexpected sand-attribute name '%s'%s. Stopping parsing." % (attr_name, number_text))
                     raise ParsingStopped
                 # Parse the value
                 value = self.check_value(syntax[attr_name], input[item_length:])
                 item_length += value.char_count
                 # Attributes must be unique
                 if hasattr(result, attr_name):
-                    self.add_error("sand-attribute %s should occur only once." % attr_name)
+                    self.add_error("sand-attribute %s should occur only once%s." % (attr_name, number_text))
                 setattr(result, attr_name, value.data)
             # Now that on item has been parsed, prepare for the next
             # move to remaining input:
@@ -210,7 +215,7 @@ class HeaderSyntaxChecker:
                     result.char_count += 1
                     input = input[1:]
                 elif first_level:
-                    self.add_error("Expecting ',', found '%s'. Stopping parsing." % input[0])
+                    self.add_error("Expecting ',', found '%s'%s. Stopping parsing." % (input[0], number_text))
                     raise ParsingStopped
                 else:
                     # 2 cases:
@@ -221,10 +226,10 @@ class HeaderSyntaxChecker:
         for attr_name in syntax[MANDATORY]:
             if attr_name == 'list':
                 if result.list is None:
-                    self.add_error("Mandatory sand-list is missing")
+                    self.add_error("Mandatory sand-list is missing%s." % number_text)
             else:
                 if not hasattr(result, attr_name):
-                    self.add_error("Mandatory sand-attribute '%s' is missing" % attr_name)
+                    self.add_error("Mandatory sand-attribute '%s' is missing%s." % (attr_name, number_text))
         return result
     
     def check_list(self, syntax, input):
@@ -234,16 +239,17 @@ class HeaderSyntaxChecker:
         Returns the corresponding SandList or raises ParsingStopped.
         The returned SandList has its attribute char_count indicating how many
         characters where used from input."""
-        # TODO: keep index of current item for inclusion in error messages
         # Skip the opening bracket
         assert(input[0] == '[') # ensured by caller
         result = SandList()
         result.char_count = 1
         input = input[1:]
+        item_number = 0
         # Eat input until end or closing backet
         while input and input[0] != ']':
+            item_number += 1
             # items of the list should be sand-object:
-            next = self.check_object(syntax, input)
+            next = self.check_object(syntax, input, item_number=item_number)
             result.char_count += next.char_count
             # store the found item
             result.append(next)
@@ -256,7 +262,7 @@ class HeaderSyntaxChecker:
                     result.char_count += 1
                     input = input[1:]
                     if input and input[0] == ']':
-                        self.add_error('Empty element at end of sand-list')
+                        self.add_error('Empty element at end of sand-list.')
                 elif input[0] != ']':
                     self.add_error("Expecting ';' or ']', found '%s'. Stopping parsing." % input[0])
                     raise ParsingStopped
@@ -291,7 +297,7 @@ class HeaderSyntaxChecker:
                 match = datetime_allowed_chars.match(input)
                 if match:
                     result.data = match.group(0)
-            self.add_error("Wrong or missing %s specification" % expected_type)
+            self.add_error("Wrong or missing %s specification." % expected_type)
         result.char_count = len(result.data)
         return result
 
@@ -315,7 +321,7 @@ class AnticipatedRequestsChecker(HeaderSyntaxChecker):
         # Additional checks
         if o:
             if not o.list:
-                self.add_error("At least one request must be specified")
+                self.add_error("At least one request must be specified.")
 
 class SharedResourceAllocationChecker(HeaderSyntaxChecker):
     """Class to check a SAND-ResourceAllocation header message."""
@@ -340,14 +346,14 @@ class SharedResourceAllocationChecker(HeaderSyntaxChecker):
         # Additional checks
         if o:
             if not o.list:
-                self.add_error("At least one operation point must be specified")
+                self.add_error("At least one operation point must be specified.")
             try:
                 strategy = o.allocationStrategy
                 if strategy in ('"urn:mpeg:dash:sand:allocation:premium-privileged:2016"',
                                 '"urn:mpeg:dash:sand:allocation:everybody-served:2016"',
                                 '"urn:mpeg:dash:sand:allocation:weighted:2016"'):
                     if not hasattr(o, 'weight'):
-                        self.add_error("Attribute weight is mandatory for strategy %s" % strategy)
+                        self.add_error("Attribute weight is mandatory for strategy %s." % strategy)
             except AttributeError:
                 # no allocation strategy specified
                 pass
@@ -373,7 +379,7 @@ class AcceptedAlternativesChecker(HeaderSyntaxChecker):
         # Additional checks
         if o:
             if not o.list:
-                self.add_error("At least one alternative must be specified")
+                self.add_error("At least one alternative must be specified.")
 
 class AbsoluteDeadlineChecker(HeaderSyntaxChecker):
     """Class to check a SAND- header message."""
@@ -428,7 +434,7 @@ class NextAlternativesChecker(HeaderSyntaxChecker):
         # Additional checks
         if o:
             if not o.list:
-                self.add_error("At least one alternative must be specified")
+                self.add_error("At least one alternative must be specified.")
 
 class ClientCapabilitiesChecker(HeaderSyntaxChecker):
     """Class to check a SAND-ClientCapabilities header message."""
@@ -448,7 +454,7 @@ class ClientCapabilitiesChecker(HeaderSyntaxChecker):
         # Additional checks
         if o:
             if hasattr(o, 'supportedMessage') and hasattr(o, 'messageSetUri'):
-                self.add_error("Only one of supportedMessage or messageSetUri should be specified")
+                self.add_error("Only one of supportedMessage or messageSetUri should be specified.")
 
 class BwInformationChecker(HeaderSyntaxChecker):
     """Class to check a SAND-BwInformation header message."""
@@ -468,22 +474,25 @@ class BwInformationChecker(HeaderSyntaxChecker):
         # Additional checks
         if o:
             if not hasattr(o, 'minBandwidth') and not hasattr(o, 'maxBandwidth'):
-                self.add_error("At least one of minBandwidth or maxBandwidth should be specified")
+                self.add_error("At least one of minBandwidth or maxBandwidth should be specified.")
             if hasattr(o, 'minBandwidth') and hasattr(o, 'maxBandwidth'):
                 minBW = int(o.minBandwidth)
                 maxBW = int(o.maxBandwidth)
                 if maxBW < minBW:
-                    self.add_error("The value of maxBandwidth should be greater or equal than minBandwidth")
+                    self.add_error("The value of maxBandwidth should be greater or equal than minBandwidth.")
 
+# This dictionary maps header names to the class to use for checking the value.
+# We use lower cased values of header names, since HTTP headers are case-insensitive
+# and so comparison can be made on lowered names.
 header_name_to_checker = {
-  'SAND-AnticipatedRequests': AnticipatedRequestsChecker(),
-  'SAND-SharedResourceAllocation': SharedResourceAllocationChecker(),
-  'SAND-AcceptedAlternatives': AcceptedAlternativesChecker(),
-  'SAND-AbsoluteDeadline': AbsoluteDeadlineChecker(),
-  'SAND-MaxRTT': MaxRTTChecker(),
-  'SAND-NextAlternatives': NextAlternativesChecker(),
-  'SAND-ClientCapabilities': ClientCapabilitiesChecker(),
-  'SAND-BwInformation': BwInformationChecker(),
+  'sand-anticipatedrequests': AnticipatedRequestsChecker(),
+  'sand-sharedresourceallocation': SharedResourceAllocationChecker(),
+  'sand-acceptedalternatives': AcceptedAlternativesChecker(),
+  'sand-absolutedeadline': AbsoluteDeadlineChecker(),
+  'sand-maxrtt': MaxRTTChecker(),
+  'sand-nextalternatives': NextAlternativesChecker(),
+  'sand-clientcapabilities': ClientCapabilitiesChecker(),
+  'sand-bwinformation': BwInformationChecker(),
 }
 
 if __name__ == '__main__':
@@ -505,7 +514,7 @@ if __name__ == '__main__':
         for file_name in glob(os.path.join(prefix, 'status', match)) + glob(os.path.join(prefix, 'ped', match)):
             with open(file_name) as f:
                 name, input = f.readline().split(':', 1)
-                c = header_name_to_checker[name]
+                c = header_name_to_checker[name.lower()]
                 c.check_syntax(input.strip())
             if c.errors:
                 print 'FAILED', file_name
