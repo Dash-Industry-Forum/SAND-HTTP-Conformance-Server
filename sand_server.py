@@ -125,7 +125,7 @@ def check_headers():
         result += '%s: PASSED\n' % name
   else:
     result += 'No SAND header found!\n'
-  return result, 200, {'Content-Type': 'text/raw'}
+  return result, 200, {'Content-Type': 'text/plain'}
 
 if __name__ == "__main__":
   print "========= SAND conformance server ============="
