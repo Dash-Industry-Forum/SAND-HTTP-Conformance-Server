@@ -51,9 +51,7 @@ uri_encoded = r'%[A-Fa-f0-9]{2}'
 # A dictionary of regexps for checking all SAND value types
 regular_expressions = {
     'QUOTEDSTRING': re.compile(r'"(\\"|[^"])*"'),
-    # TODO: we would like to accept path only, relative to content request...
-    #'QUOTEDURI': re.compile(r'"%s:(%s|%s)+"' % (uri_proto, uri_allowed, uri_encoded)),
-    'QUOTEDURI': re.compile(r'"(%s|%s)+"' % (uri_allowed, uri_encoded)),
+    'QUOTEDURI': re.compile(r'("%s:(%s|%s)+")|("(%s|%s)+")' % (uri_proto, uri_allowed, uri_encoded, uri_allowed, uri_encoded)),
     # TODO: we have no example of TOKEN in HTTP headers
     # the exact expression should be refined.
     'TOKEN': re.compile(r'[a-zA-Z0-9]+'),
