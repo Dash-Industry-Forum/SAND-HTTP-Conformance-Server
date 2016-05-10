@@ -300,6 +300,18 @@ class HeaderSyntaxChecker:
             self.add_error("Wrong or missing %s specification." % expected_type)
         result.char_count = len(result.data)
         return result
+    
+    def optional_attributes(self, obj, syntax):
+        """Extracts a tuple of the optional attributes included in a SandObject.
+        This is a utility method for subclasses.
+        obj is the considered SandObject after parsing.
+        syntax is the syntax for this object.
+        Retuns the set of the optional attribute names present on the object."""
+        result = set()
+        for attr_name in syntax:
+            if attr_name is not MANDATORY and attr_name not in syntax[MANDATORY] and hasattr(obj, attr_name):
+                result.add(attr_name)
+        return result
 
 class AnticipatedRequestsChecker(HeaderSyntaxChecker):
     """Class to check a SAND-AnticipatedRequests header message."""
@@ -357,6 +369,14 @@ class SharedResourceAllocationChecker(HeaderSyntaxChecker):
             except AttributeError:
                 # no allocation strategy specified
                 pass
+            if o.list and False: # TODO: if approved check (noted in specification) then remove the False to activate check
+                # Check that provided attributes are consistent through the list:
+                syntax = self.syntax['list']
+                attributes = self.optional_attributes(o.list[0], syntax)
+                for obj in o.list[1:]:
+                    if self.optional_attributes(obj, syntax) != attributes:
+                        self.add_error("Optional attributes are not consistent through the list of operationPoints")
+                        break
 
 class AcceptedAlternativesChecker(HeaderSyntaxChecker):
     """Class to check a SAND-AcceptedAlternatives header message."""
