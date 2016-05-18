@@ -39,6 +39,8 @@ from flask import Flask, request
 from werkzeug.routing import Rule
 from lxml import etree
 
+import sand_header
+
 app = Flask(__name__)
 app.debug = False
 app.url_map.add(Rule('/metrics', endpoint='metrics'))
@@ -102,7 +104,6 @@ def metrics():
     print "[RESULT] Failure"
     return "Test failed !"
 
-# PER endpoint
 # TODO: Should only be routed for GET requests
 app.url_map.add(Rule('/per', endpoint='per'))
 
@@ -110,6 +111,31 @@ app.url_map.add(Rule('/per', endpoint='per'))
 def per():
   # Pick a PER message
  
+
+@app.route('/headers')
+def check_headers():
+  success = True
+  report = {}
+  for header_name, msg in request.headers.items():
+    if header_name.upper().startswith('SAND-'):
+      checker = sand_header.header_name_to_checker.get(header_name.lower())
+      if checker:
+        checker.check_syntax(msg.strip())
+        report[header_name] = checker.errors
+      else:
+        report[header_name] = ['Header name not supported by this version of conformance server.']
+  result = "Report for SAND headers conformance:\n"
+  if report:
+    for name, errors in report.items():
+      if errors:
+        result += '%s: FAILED\n' % name
+        for msg in errors:
+          result  += '    %s\n' % msg
+      else:
+        result += '%s: PASSED\n' % name
+  else:
+    result += 'No SAND header found!\n'
+  return result, 200, {'Content-Type': 'text/plain'}
 
 if __name__ == "__main__":
   print "========= SAND conformance server ============="
