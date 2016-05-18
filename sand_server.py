@@ -102,6 +102,15 @@ def metrics():
     print "[RESULT] Failure"
     return "Test failed !"
 
+# PER endpoint
+# TODO: Should only be routed for GET requests
+app.url_map.add(Rule('/per', endpoint='per'))
+
+@app.endpoint('per')
+def per():
+  # Pick a PER message
+ 
+
 if __name__ == "__main__":
   print "========= SAND conformance server ============="
   print "-----------------------------------------------"
