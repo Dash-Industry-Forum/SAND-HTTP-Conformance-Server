@@ -47,21 +47,23 @@ app.url_map.add(Rule('/metrics', endpoint='metrics'))
 def metrics():
   success = True
   
+  expected_request_method = "POST"
+  expected_content_type = "application/sand+xml"
+
   # Test 1 - HTTP method test
-  if request.method == "POST":
-    print "[TEST] HTTP method OK (POST)"
+  if request.method == expected_request_method:
+    print "[TEST] HTTP method OK (" + expected_request_method + ")"
     success &= True
   else:
-    print "[TEST] HTTP method NOK (" + request.method + " != POST)"
+    print "[TEST] HTTP method NOK (" + request.method + " != " + expected_request_method + ")"
     success = False
   
   # Test 2 - Content-Type of SAND messages
-  sand_mime_type = "application/sand+xml"
-  if request.headers['Content-Type'] == sand_mime_type:
-    print "[TEST] Content-Type OK (" + sand_mime_type + ")"
+  if request.headers['Content-Type'] == expected_content_type:
+    print "[TEST] Content-Type OK (" + expected_content_type + ")"
     success &= True
   else:
-    print "[TEST] Content-Type NOK (" + request.headers['Content-Type'] + " != " + sand_mime_type + ")"
+    print "[TEST] Content-Type NOK (" + request.headers['Content-Type'] + " != " + expected_content_type + ")"
     success = False
 
   # Test 3 - Message validation
