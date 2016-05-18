@@ -67,7 +67,7 @@ def metrics():
   # Test 3 - Message validation
   try:
     
-    with open("./schemas/sand_message.xsd") as f: 
+    with open("./schemas/sand_messages.xsd") as f: 
       sand_schema_doc = etree.parse(f)
       sand_schema = etree.XMLSchema(sand_schema_doc)
 
