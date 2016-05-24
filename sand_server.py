@@ -39,10 +39,10 @@ from flask import Flask, request
 from werkzeug.routing import Rule
 from lxml import etree
 
-import sand_header
+import sand.header
 
 app = Flask(__name__)
-app.debug = False
+app.debug = True
 app.url_map.add(Rule('/metrics', endpoint='metrics'))
 
 @app.endpoint('metrics')
@@ -110,6 +110,7 @@ app.url_map.add(Rule('/per', endpoint='per'))
 @app.endpoint('per')
 def per():
   # Pick a PER message
+  return "Not implemented"
  
 
 @app.route('/headers')
@@ -118,7 +119,7 @@ def check_headers():
   report = {}
   for header_name, msg in request.headers.items():
     if header_name.upper().startswith('SAND-'):
-      checker = sand_header.header_name_to_checker.get(header_name.lower())
+      checker = sand.header.header_name_to_checker.get(header_name.lower())
       if checker:
         checker.check_syntax(msg.strip())
         report[header_name] = checker.errors
