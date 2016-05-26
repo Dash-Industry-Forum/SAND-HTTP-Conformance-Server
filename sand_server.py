@@ -35,11 +35,15 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
+import logging
 from flask import Flask, request
 from werkzeug.routing import Rule
 from lxml import etree
 
 import sand.header
+
+root = logging.getLogger()
+root.setLevel(logging.DEBUG)
 
 app = Flask(__name__)
 app.debug = True
@@ -47,89 +51,93 @@ app.url_map.add(Rule('/metrics', endpoint='metrics'))
 
 @app.endpoint('metrics')
 def metrics():
-  success = True
+    success = True
   
-  expected_request_method = "POST"
-  expected_content_type = "application/sand+xml"
+    expected_request_method = "POST"
+    expected_content_type = "application/sand+xml"
 
-  # Test 1 - HTTP method test
-  if request.method == expected_request_method:
-    print "[TEST] HTTP method OK (" + expected_request_method + ")"
-    success &= True
-  else:
-    print "[TEST] HTTP method NOK (" + request.method + " != " + expected_request_method + ")"
-    success = False
-  
-  # Test 2 - Content-Type of SAND messages
-  if request.headers['Content-Type'] == expected_content_type:
-    print "[TEST] Content-Type OK (" + expected_content_type + ")"
-    success &= True
-  else:
-    print "[TEST] Content-Type NOK (" + request.headers['Content-Type'] + " != " + expected_content_type + ")"
-    success = False
-
-  # Test 3 - Message validation
-  try:
-    
-    with open("./schemas/sand_messages.xsd") as f: 
-      sand_schema_doc = etree.parse(f)
-      sand_schema = etree.XMLSchema(sand_schema_doc)
-
-      try:
-        sand_message = etree.fromstring(request.data)
-        sand_schema.assertValid(sand_message)
-        print "[TEST] SAND message validation OK."
+    # Test 1 - HTTP method test
+    if request.method == expected_request_method:
+        logging.info("[TEST] HTTP method OK (%s)", expected_request_method)
         success &= True
-      except etree.DocumentInvalid as e:
-        print "[TEST] SAND message validation NOK."
-        print e
-        success = False
-      except:
-        print "[ERROR] XML SAND message parsing."
+    else:
+        logging.info("[TEST] HTTP method NOK (%s != %s)",
+                     request.method,
+                     expected_request_method)
         success = False
   
-  except etree.XMLSchemaParseError as e:
-    print "[ERROR] XML schema parsing."
-    print e
-    success = False
-  except:
-    print "[ERROR] XML schema parsing."
-    success = False
+    # Test 2 - Content-Type of SAND messages
+    if request.headers['Content-Type'] == expected_content_type:
+        logging.info("[TEST] Content-Type OK (%s)", expected_content_type)
+        success &= True
+    else:
+        logging.info("[TEST] Content-Type NOK (%s != %s)",
+                     request.headers['Content-Type'],
+                     expected_content_type)
+        success = False
+
+    # Test 3 - Message validation
+    try:
+    
+        with open("./schemas/sand_messages.xsd") as f: 
+            sand_schema_doc = etree.parse(f)
+            sand_schema = etree.XMLSchema(sand_schema_doc)
+
+            try:
+                sand_message = etree.fromstring(request.data)
+                sand_schema.assertValid(sand_message)
+                logging.info("[TEST] SAND message validation OK")
+                success &= True
+            except etree.DocumentInvalid as e:
+                logging.info("[TEST] SAND message validation NOK")
+                logging.error(e)
+                success = False
+            except:
+                plogging.error("XML SAND message parsing")
+                success = False
+  
+    except etree.XMLSchemaParseError as e:
+        logging.error(e)
+        success = False
+    except:
+        logger.error("XML schema parsing")
+        success = False
   
 
-  if success:
-    print "[RESULT] Success"
-    return "Test succeeded !"
-  else:
-    print "[RESULT] Failure"
-    return "Test failed !"
+    if success:
+        logging.info("[RESULT] Success")
+        return "Test succeeded !"
+    else:
+        logging.info("[RESULT] Failure")
+        return "Test failed !"
 
 @app.route('/headers')
 def check_headers():
-  success = True
-  report = {}
-  for header_name, msg in request.headers.items():
-    if header_name.upper().startswith('SAND-'):
-      checker = sand.header.header_name_to_checker.get(header_name.lower())
-      if checker:
-        checker.check_syntax(msg.strip())
-        report[header_name] = checker.errors
-      else:
-        report[header_name] = ['Header name not supported by this version of conformance server.']
-  result = "Report for SAND headers conformance:\n"
-  if report:
-    for name, errors in report.items():
-      if errors:
-        result += '%s: FAILED\n' % name
-        for msg in errors:
-          result  += '    %s\n' % msg
-      else:
-        result += '%s: PASSED\n' % name
-  else:
-    result += 'No SAND header found!\n'
-  return result, 200, {'Content-Type': 'text/plain'}
+    success = True
+    report = {}
+    for header_name, msg in request.headers.items():
+        if header_name.upper().startswith('SAND-'):
+            checker = sand.header.header_name_to_checker.get(header_name.lower())
+            if checker:
+                checker.check_syntax(msg.strip())
+                report[header_name] = checker.errors
+            else:
+                report[header_name] = [('Header name not supported by this ' +
+                                        'version of conformance server')]
+        result = "Report for SAND headers conformance:\n"
+        if report:
+            for name, errors in report.items():
+                if errors:
+                    result += '%s: FAILED\n' % name
+                    for msg in errors:
+                        result  += '    %s\n' % msg
+                else:
+                    result += '%s: PASSED\n' % name
+        else:
+            result += 'No SAND header found!\n'
+    return result, 200, {'Content-Type': 'text/plain'}
 
 if __name__ == "__main__":
-  print "========= SAND conformance server ============="
-  print "-----------------------------------------------"
-  app.run()
+    print "========= SAND conformance server ============="
+    print "-----------------------------------------------"
+    app.run()
