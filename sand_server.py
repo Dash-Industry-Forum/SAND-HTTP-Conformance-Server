@@ -104,15 +104,6 @@ def metrics():
     print "[RESULT] Failure"
     return "Test failed !"
 
-# TODO: Should only be routed for GET requests
-app.url_map.add(Rule('/per', endpoint='per'))
-
-@app.endpoint('per')
-def per():
-  # Pick a PER message
-  return "Not implemented"
- 
-
 @app.route('/headers')
 def check_headers():
   success = True
