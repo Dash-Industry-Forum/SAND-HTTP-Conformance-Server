@@ -41,6 +41,7 @@ from werkzeug.routing import Rule
 from lxml import etree
 
 import sand.header
+from sand.xml_message import XMLValidator
 
 root = logging.getLogger()
 root.setLevel(logging.DEBUG)
@@ -78,38 +79,23 @@ def metrics():
 
     # Test 3 - Message validation
     try:
-    
-        with open("./schemas/sand_messages.xsd") as f: 
-            sand_schema_doc = etree.parse(f)
-            sand_schema = etree.XMLSchema(sand_schema_doc)
-
-            try:
-                sand_message = etree.fromstring(request.data)
-                sand_schema.assertValid(sand_message)
-                logging.info("[TEST] SAND message validation OK")
-                success &= True
-            except etree.DocumentInvalid as e:
-                logging.info("[TEST] SAND message validation NOK")
-                logging.error(e)
-                success = False
-            except:
-                plogging.error("XML SAND message parsing")
-                success = False
-  
-    except etree.XMLSchemaParseError as e:
-        logging.error(e)
-        success = False
+        validator = XMLValidator()
+        if validator.from_string(request.data):
+            logging.info("[TEST] SAND message validation OK")
+            success &= True
+        else:
+            logging.info("[TEST] SAND message validation KO")
+            success = False
     except:
-        logger.error("XML schema parsing")
+        logging.error("XML SAND message parsing")
         success = False
-  
 
     if success:
         logging.info("[RESULT] Success")
-        return "Test succeeded !"
+        return ("Test succeeded !", 200)
     else:
         logging.info("[RESULT] Failure")
-        return "Test failed !"
+        return ("Test failed !", 400)
 
 @app.route('/headers')
 def check_headers():
