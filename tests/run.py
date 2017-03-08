@@ -62,10 +62,10 @@ class TestMetrics(unittest.TestCase):
     This collects tests for metrics sent by the client with HTTP POST.
     """
     def setUp(self):
-        dev_null = open(devnull, 'w')
+        server_log = open("server.log", "w")
         Popen(
             ["../sand_server.py", "run", "--port", str(PORT_LOCAL_SAND_SERVER)],
-            stdout=dev_null, stderr=STDOUT)
+            stdout=server_log, stderr=STDOUT)
         # We wait a bit for the server to start
         sleep(2)
 

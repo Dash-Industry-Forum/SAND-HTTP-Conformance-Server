@@ -1,0 +1,24 @@
+========= SAND conformance server =============
+-----------------------------------------------
+Traceback (most recent call last):
+  File "../sand_server.py", line 150, in <module>
+    cli()
+  File "/usr/lib/python2.7/site-packages/click/core.py", line 722, in __call__
+    return self.main(*args, **kwargs)
+  File "/usr/lib/python2.7/site-packages/click/core.py", line 697, in main
+    rv = self.invoke(ctx)
+  File "/usr/lib/python2.7/site-packages/click/core.py", line 1066, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+  File "/usr/lib/python2.7/site-packages/click/core.py", line 895, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+  File "/usr/lib/python2.7/site-packages/click/core.py", line 535, in invoke
+    return callback(*args, **kwargs)
+  File "../sand_server.py", line 145, in run
+    APP.run(port=port)
+  File "/usr/lib/python2.7/site-packages/flask/app.py", line 772, in run
+    run_simple(host, port, self, **options)
+  File "/usr/lib/python2.7/site-packages/werkzeug/serving.py", line 674, in run_simple
+    s.bind((hostname, port))
+  File "/usr/lib/python2.7/socket.py", line 228, in meth
+    return getattr(self._sock,name)(*args)
+socket.error: [Errno 112] Address already in use
