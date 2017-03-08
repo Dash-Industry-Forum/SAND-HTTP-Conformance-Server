@@ -36,43 +36,52 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 
 import logging
+
 from flask import Flask, request
+
 from werkzeug.routing import Rule
+
 from lxml import etree
 
+import click
+
 import sand.header
+
 from sand.xml_message import XMLValidator
 
 root = logging.getLogger()
 root.setLevel(logging.DEBUG)
 
-app = Flask(__name__)
-app.debug = True
-app.url_map.add(Rule('/metrics', endpoint='metrics'))
+APP = Flask(__name__)
+APP.debug = True
+APP.url_map.add(Rule('/metrics', endpoint='metrics'))
 
-@app.endpoint('metrics')
+@APP.endpoint('metrics')
 def metrics():
+    """
+    Validates the reception of metrics sent by DASH clients.
+    """
     success = True
-  
+
     expected_request_method = "POST"
     expected_content_type = "application/sand+xml"
 
     # Test 1 - HTTP method test
     if request.method == expected_request_method:
-        logging.info("[TEST] HTTP method OK (%s)", expected_request_method)
+        logging.info("[TEST][OK] HTTP method (%s)", expected_request_method)
         success &= True
     else:
-        logging.info("[TEST] HTTP method NOK (%s != %s)",
+        logging.info("[TEST][OK] HTTP method (%s != %s)",
                      request.method,
                      expected_request_method)
         success = False
-  
+
     # Test 2 - Content-Type of SAND messages
     if request.headers['Content-Type'] == expected_content_type:
-        logging.info("[TEST] Content-Type OK (%s)", expected_content_type)
+        logging.info("[TEST][OK] Content-Type (%s)", expected_content_type)
         success &= True
     else:
-        logging.info("[TEST] Content-Type NOK (%s != %s)",
+        logging.info("[TEST][KO] Content-Type (%s != %s)",
                      request.headers['Content-Type'],
                      expected_content_type)
         success = False
@@ -81,23 +90,23 @@ def metrics():
     try:
         validator = XMLValidator()
         if validator.from_string(request.data):
-            logging.info("[TEST] SAND message validation OK")
+            logging.info("[TEST][OK] SAND message validation")
             success &= True
         else:
-            logging.info("[TEST] SAND message validation KO")
+            logging.info("[TEST][KO] SAND message validation")
             success = False
     except:
         logging.error("XML SAND message parsing")
         success = False
 
     if success:
-        logging.info("[RESULT] Success")
-        return ("Test succeeded !", 200)
+        logging.info("[RESULT][OK]")
+        return ("[RESULT][OK]", 200)
     else:
-        logging.info("[RESULT] Failure")
-        return ("Test failed !", 400)
+        logging.info("[RESULT][KO]")
+        return ("[RESULT][KO]", 400)
 
-@app.route('/headers')
+@APP.route('/headers')
 def check_headers():
     success = True
     report = {}
@@ -123,7 +132,19 @@ def check_headers():
             result += 'No SAND header found!\n'
     return result, 200, {'Content-Type': 'text/plain'}
 
-if __name__ == "__main__":
+@click.group()
+def cli():
+    pass
+
+
+@click.command()
+@click.option("--port", default=5000, help="Listening port of the SAND conformance server.")
+def run(port):
     print "========= SAND conformance server ============="
     print "-----------------------------------------------"
-    app.run()
+    APP.run(port=port)
+
+cli.add_command(run)
+
+if __name__ == '__main__':
+    cli()

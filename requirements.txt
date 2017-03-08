@@ -2,3 +2,4 @@ gunicorn
 Flask
 Werkzeug 
 lxml
+click
