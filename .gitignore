@@ -1,3 +1,6 @@
 *~
 *.swp
 *.pyc
+
+tests/server.log
+tests/report.log

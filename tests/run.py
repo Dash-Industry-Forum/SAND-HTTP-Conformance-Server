@@ -64,8 +64,8 @@ class TestMetrics(unittest.TestCase):
     def setUp(self):
         server_log = open("server.log", "w")
         Popen(
-            ["../sand_server.py", "run", "--port", str(PORT_LOCAL_SAND_SERVER)],
-            stdout=server_log)
+            ["../sand_server.py", "run", "--port", str(PORT_LOCAL_SAND_SERVER)])
+            #stdout=server_log)
             #stderr=STDOUT)
         # We wait a bit for the server to start
         sleep(2)
