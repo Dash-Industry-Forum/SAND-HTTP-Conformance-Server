@@ -34,8 +34,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
 import sys
 
-from os import devnull
-
 from time import sleep
 
 from subprocess import Popen, STDOUT

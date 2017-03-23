@@ -77,7 +77,7 @@ def metrics():
         success = False
 
     # Test 2 - Content-Type of SAND messages
-    if request.headers['Content-Type'] == expected_content_type:
+    if request.headers.get('Content-Type') == expected_content_type:
         logging.info("[TEST][OK] Content-Type (%s)", expected_content_type)
         success &= True
     else:
