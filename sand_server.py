@@ -41,16 +41,14 @@ from flask import Flask, request
 
 from werkzeug.routing import Rule
 
-from lxml import etree
-
 import click
 
 import sand.header
 
 from sand.xml_message import XMLValidator
 
-root = logging.getLogger()
-root.setLevel(logging.DEBUG)
+LOGGER = logging.getLogger()
+LOGGER.setLevel(logging.DEBUG)
 
 APP = Flask(__name__)
 APP.debug = True
@@ -77,12 +75,12 @@ def metrics():
         success = False
 
     # Test 2 - Content-Type of SAND messages
-    if request.headers.get('Content-Type') == expected_content_type:
+    if request.headers.get("Content-Type") == expected_content_type:
         logging.info("[TEST][OK] Content-Type (%s)", expected_content_type)
         success &= True
     else:
         logging.info("[TEST][KO] Content-Type (%s != %s)",
-                     request.headers['Content-Type'],
+                     request.headers.get("Content-Type"),
                      expected_content_type)
         success = False
 
