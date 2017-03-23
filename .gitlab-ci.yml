@@ -4,7 +4,7 @@ test:
   - apt-get install -y python-dev python-pip
   - pip install -r requirements.txt
   - cd tests/ && pip install -r requirements.txt
-  - sudo python run.py -v
+  - python run.py -v
   artifacts:
     paths:
     - tests/report.log
