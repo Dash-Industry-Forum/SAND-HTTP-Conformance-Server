@@ -62,13 +62,19 @@ class TestMetrics(unittest.TestCase):
     This collects tests for metrics sent by the client with HTTP POST.
     """
     def setUp(self):
-        server_log = open("server.log", "w")
-        Popen(
-            ["../sand_server.py", "run", "--port", str(PORT_LOCAL_SAND_SERVER)])
-            #stdout=server_log)
-            #stderr=STDOUT)
-        # We wait a bit for the server to start
-        sleep(2)
+        try:
+            # We assume the test sever runs locally on the default port
+            requests.get(("http://localhost:%i" % PORT_LOCAL_SAND_SERVER))
+        except:
+            logging.info("No test server detected. We will create one.")
+            server_log = open("server.log", "w")
+            Popen(
+                ["../sand_server.py", "run",
+                 "--port", str(PORT_LOCAL_SAND_SERVER)],
+                stdout=server_log,
+                stderr=STDOUT)
+            # We wait a bit for the server to start
+            sleep(2)
 
     def test_invalid_get_request(self):
         """

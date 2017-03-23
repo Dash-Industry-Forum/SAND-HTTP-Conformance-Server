@@ -1,4 +1,6 @@
 INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): localhost
+DEBUG:requests.packages.urllib3.connectionpool:"GET / HTTP/1.1" 404 233
+INFO:requests.packages.urllib3.connectionpool:Starting new HTTP connection (1): localhost
 DEBUG:requests.packages.urllib3.connectionpool:"GET /metrics HTTP/1.1" 400 12
 INFO:root:Server response
 INFO:root:===============
