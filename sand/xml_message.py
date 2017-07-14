@@ -35,7 +35,7 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 """
-
+from StringIO import StringIO
 from os.path import dirname, join
 from lxml import etree
 from lxml import isoschematron
@@ -60,22 +60,26 @@ class XMLValidator:
         is_valid = False
         try:
             message_doc = etree.parse(file_path)
-            is_valid = (self.sand_xml_schema.validate(message_doc)
-                    and self.sand_schematron.validate(message_doc))
+            self.sand_xml_schema.validate(message_doc)
+            self.sand_schematron.validate(message_doc)
+            is_valid = True
         except etree.XMLSyntaxError as e:
-            print e
+            print e.message
+        except etree.DocumentInvalid as e:
+            print e.message
 
         return is_valid
 
     def from_string(self, message_string):
         is_valid = False
         try:
-            parser = etree.XMLParser(schema = self.sand_xml_schema)
-            etree.fromstring(message_string, parser)
-            # If execution passes, XML schema validation succeeded
-            message_doc = etree.parse(message_string)
-            is_valid = self.sand_schematron.validate(message_doc)
+            message_doc = etree.parse(StringIO(message_string))
+            self.sand_xml_schema.assertValid(message_doc)
+            self.sand_schematron.validate(message_doc)
+            is_valid = True
         except etree.XMLSyntaxError as e:
-            print e
+            print e.message
+        except etree.DocumentInvalid as e:
+            print e.message
 
         return is_valid
