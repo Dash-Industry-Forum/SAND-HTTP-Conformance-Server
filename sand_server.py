@@ -106,11 +106,14 @@ def metrics():
 
 @APP.route('/headers')
 def check_headers():
-    success = True
+    """
+    Check the MPEG DASH SAND header syntax.
+    """
     report = {}
     for header_name, msg in request.headers.items():
         if header_name.upper().startswith('SAND-'):
-            checker = sand.header.header_name_to_checker.get(header_name.lower())
+            checker = sand.header.header_name_to_checker.get(
+                header_name.lower())
             if checker:
                 checker.check_syntax(msg.strip())
                 report[header_name] = checker.errors
@@ -123,7 +126,7 @@ def check_headers():
                 if errors:
                     result += '%s: FAILED\n' % name
                     for msg in errors:
-                        result  += '    %s\n' % msg
+                        result += '    %s\n' % msg
                 else:
                     result += '%s: PASSED\n' % name
         else:
@@ -132,12 +135,19 @@ def check_headers():
 
 @click.group()
 def cli():
+    """
+    Click group commands.
+    """
     pass
 
 
 @click.command()
-@click.option("--port", default=5000, help="Listening port of the SAND conformance server.")
+@click.option("--port", default=5000,
+              help="Listening port of the SAND conformance server.")
 def run(port):
+    """
+    Run the SAND server and listen to port 'port'.
+    """
     print "========= SAND conformance server ============="
     print "-----------------------------------------------"
     APP.run(port=port)

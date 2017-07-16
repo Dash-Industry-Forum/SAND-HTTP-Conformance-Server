@@ -18,4 +18,30 @@ a SAND client.
 
 ## Usage
 
-```python sand_server.py```
+```python sand_server.py run --port tcp_port```
+
+By default, the server listens on port 5000.
+
+## Help
+
+```python sand_server.py run --help```
+
+```
+Usage: sand_server.py run [OPTIONS]
+
+  Run the SAND server and listen to port 'port'.
+
+Options:
+  --port INTEGER  Listening port of the SAND conformance server.
+  --help          Show this message and exit.
+```
+
+## Endpoints
+
+### /header
+
+This endpoint validates that a DASH client sends a SAND message via the HTTP header as specified by ISO/IEC 23009-5 SAND.
+
+### /metrics
+
+This endpoint validates that a DASH client sends a metric message via the HTTP POST method as specified by ISO/IEC 23009-5 SAND.
