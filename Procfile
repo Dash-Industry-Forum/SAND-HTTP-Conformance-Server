@@ -1,1 +1,1 @@
-web: gunicorn sand_server:APP --log-file -
+web: python sand_server.py run
