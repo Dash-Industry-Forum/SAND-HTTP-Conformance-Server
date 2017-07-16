@@ -150,6 +150,9 @@ def run(port):
     """
     print "========= SAND conformance server ============="
     print "-----------------------------------------------"
+    import os
+    if os.environ.get('PORT') is not None:
+        port = int(os.environ['PORT'])
     APP.run(port=port)
 
 cli.add_command(run)
