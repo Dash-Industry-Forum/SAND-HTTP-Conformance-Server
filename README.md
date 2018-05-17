@@ -1,6 +1,6 @@
 # SAND conformance server
 
-[![build status](https://gitlab.com/MPEG_SAND/SAND_server/badges/master/build.svg)](https://gitlab.com/MPEG_SAND/SAND_server/commits/master)
+[![Build Status](https://travis-ci.org/edrthomas/SAND-HTTP-Conformance-Server.svg?branch=master)](https://travis-ci.org/edrthomas/SAND-HTTP-Conformance-Server)
 
 This implements a conformance server for ISO/IEC 23009-5 Server And Network
 asssited DASH (SAND).
