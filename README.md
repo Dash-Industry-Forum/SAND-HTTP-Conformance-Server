@@ -38,7 +38,7 @@ Options:
 
 ## Endpoints
 
-### /header
+### /headers
 
 This endpoint validates that a DASH client sends a SAND message via the HTTP header as specified by ISO/IEC 23009-5 SAND.
 

@@ -11,3 +11,8 @@ script:
   - cd tests/
   - pip install -r requirements.txt
   - python run.py -v
+
+deploy:
+  provider: heroku
+  api_key: $HEROKU_PRODUCTION_API_KEY
+  app: sand-conf-server
