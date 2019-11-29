@@ -1,19 +1,18 @@
 language: python
-
 python:
-  - "2.7"
+- '2.7'
 
 install:
-  - pip install -r requirements.txt
+- pip install -r requirements.txt
 
 script:
-  - python sand_server.py run --port 5000 &
-  - cd tests/
-  - pip install -r requirements.txt
-  - python run.py -v
+- python sand_server.py run --port 5000 &
+- cd tests/
+- pip install -r requirements.txt
+- python run.py -v
 
 deploy:
   provider: heroku
   api_key:
-    secure: $HEROKU_PRODUCTION_API_KEY
+    secure: hJrXKpE9bIzF9kqQWD4ysNgk7z0o+tdvp+4/6zaur6m5CoMm0CALvVAgo36sd3LPZgEws+5D6DIWmyx9CTSvy70Xhkva8RbF+vsRGGp06YR2N/Dg8lIOehGOi/vLGeYQXphrWss+myx1mPLcITCq8bvOVHPPGP6YZyXdG3BUFqDKv5Iic/gMhHJISIMfC+f3L2Yfg2BKHXoUVJNgBNjgqVXRs3ob/L7lSduS3stq0A8z09R252mUhNhka8nBbGYo/iX2wP22RpPG8SqoEERa6TwDRwvpSWYZ7HNYDGG3jFXEi4RDlpb0KpEaGtWIkGZE/HiNWNumAAPJ3sy1tiz3yEkY6cRxuKQCTaK/mX7E3tgQHGvgltjEYL+Z0bsQQT8hBiXxpkqNskSzL7Pyo94bfh5ZFrj8BlLzUfuBdHjHGFS16jcDHXPQWXA+E6aArF6MxRM+WU65zzjy3M3Jog0W1Boe4gONA6hfb+Zyp7XIcUHVEkWGl4nUv0Oy//BDhAMwTmhYTeTmtUUdqqYPJ0ElGFz0rEcumeQD++dP2845QiwSPy8Ppuob0ciAPGeYjHWe7ngeRFK1OvujNOp1jNURNR5DTqxYWr34q8DFr69heWLfIW7ZTpOJCM5NzYWgZT0RvH4yusBD9maxJQsSX17+k10hFE9hSDj6zQChiGxelbY=
   app: sand-conf-server
