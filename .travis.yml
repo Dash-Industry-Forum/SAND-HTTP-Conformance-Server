@@ -10,9 +10,3 @@ script:
 - cd tests/
 - pip install -r requirements.txt
 - python run.py -v
-
-deploy:
-  provider: heroku
-  api_key:
-   secure: "NZ/owdS+jkUaDkIWN2cKZuHh6N+aMoq0M7oGxZdjwYyTsVQxuqrp+Eubgo/7i7vPwN0v+WufHMgmx3S/4uSn7gHtPmeAk0B0Qnt2URvgwjDc4it2cWJPjKAK/yPuWipevOcdQe093EP9Gz1pfg92FHs1rpzaQQQQuE43THxVNh7t+E/xjI+rAnpfOCdbIOQQjgf+/XW31r7Lu8AqwOGhBuApCnPZMkku3OW8HSUhl6DzCMuVbL+lRor8L9q+9y3g2in/TbUUU9hU2JekoIsnwIPiFm/dbxSTjnfvkzRiyzOLb2TUVpLck/2MCWyho2o34srgHgH+WwLj8vUP6zugLzNjYJ9BXIbCWG+bydVPKZss4+/sQvj/Z3RaL7/Db86wh5r0owp9z8HaWQvT5yYpchUPy5h7dhcRho1iMuSnDysL899VSGTb2rqEgnXAxqAlt6iEA2ehnFsTQG1oXv0OvIPAwnXxIVm0LxR673VGn0q0jjl4LqHbg+lr4GMKZYnI/zRWW4Py6sZoztV4yNh+1JHOZ0MX77grEjc6ysJvo7SLbSkhK/Wr+9MgIdPor6hCn+neiKD998EPxmXRi2QKA/8tx0ED3Uvt0T9niqs/rSyxONTx5POth/Uwjq+EIXHR/M0ztcfc4pS3gM9BhQ+zltfTustEAIvzCueNHpavr8o="
-  app: sand-conf-server
